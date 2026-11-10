@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using PetStoreAPI.Tests.Api;
 using PetStoreAPI.Tests.Api.Models;
 using PetStoreAPI.Tests.Support;
@@ -106,6 +107,21 @@ public sealed class PetSteps(PetStoreClient client, CreatedPetsTracker tracker)
             throw new InvalidOperationException($"The pet payload does not contain '{fieldName}'.");
 
         tracker.Track(PetId);
+        _response = await client.CreatePetAsync(body.ToJsonString(), MediaTypeNames.Application.Json);
+        TrackPetFromResponse(_response);
+    }
+
+    [When("I create the pet with field {string} set to JSON value {string}")]
+    public async Task WhenICreatePetWithFieldValue(string fieldName, string jsonValue)
+    {
+        var body = JsonSerializer.SerializeToNode(Pet, PetStoreClient.JsonOptions)!.AsObject();
+        if (!body.ContainsKey(fieldName))
+            throw new ArgumentException($"The pet payload does not contain '{fieldName}'.", nameof(fieldName));
+
+        body[fieldName] = JsonNode.Parse(jsonValue);
+        if (fieldName != "id")
+            tracker.Track(PetId);
+
         _response = await client.CreatePetAsync(body.ToJsonString(), MediaTypeNames.Application.Json);
         TrackPetFromResponse(_response);
     }

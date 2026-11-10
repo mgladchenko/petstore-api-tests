@@ -42,11 +42,12 @@ dotnet test --filter "Category!=knownIssue"
 
 | Endpoint | Scenarios |
 |---|---|
-| `POST /pet` | complete pet is returned and persisted; server-generated ID; malformed JSON → 400; missing required `name` or `photoUrls` → 405 (known API issue) |
+| `POST /pet` | complete pet is returned and persisted; server-generated ID; malformed JSON → 400; missing required fields, invalid types, and null validation (known API issues) |
 | `GET /pet/{petId}` | existing pet is returned; deleted pet → 404; confirmed-unused ID → 404; non-numeric ID is rejected (known API issue)|
 | `DELETE /pet/{petId}` | delete is confirmed and the pet is gone; another pet remains unaffected; repeated delete → 404; non-numeric ID is rejected (known API issue) |
 
 ## Known issues
 
 - POST without required `name` or `photoUrls` returns 200 instead of the documented 405. Tagged as `@knownIssue`.
+- POST with invalid field types returns 500 (tests expect 400 for deserialization errors); `name: null` returns 200 (expected 405 for invalid input). Tagged as `@knownIssue`.
 - GET and DELETE with non-numeric IDs return 404 instead of the documented 400. Tagged as `@knownIssue`.

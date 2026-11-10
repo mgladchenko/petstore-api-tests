@@ -36,3 +36,15 @@ Feature: Create pet
       | field     |
       | name      |
       | photoUrls |
+
+  @knownIssue
+  Scenario Outline: Pet with an invalid field value is rejected
+    Given a new pet with all fields populated
+    When I create the pet with field "<field>" set to JSON value '<value>'
+    Then the response status code is <expectedStatus>
+
+    Examples:
+      | field     | value          | expectedStatus |
+      | id        | "abc"          | 400            |
+      | photoUrls | "not-an-array" | 400            |
+      | name      | null           | 405            |
