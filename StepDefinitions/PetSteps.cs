@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mime;
+using System.Text.Json;
 using PetStoreAPI.Tests.Api;
 using PetStoreAPI.Tests.Api.Models;
 using PetStoreAPI.Tests.Support;
@@ -94,11 +95,32 @@ public sealed class PetSteps(PetStoreClient client, CreatedPetsTracker tracker)
         TrackPetFromResponse(_response);
     }
 
+    [When("I create the pet without the required field {string}")]
+    public async Task WhenICreatePetWithoutRequiredField(string fieldName)
+    {
+        if (fieldName is not ("name" or "photoUrls"))
+            throw new ArgumentException("Expected a required pet field: name or photoUrls.", nameof(fieldName));
+
+        var body = JsonSerializer.SerializeToNode(Pet, PetStoreClient.JsonOptions)!.AsObject();
+        if (!body.Remove(fieldName))
+            throw new InvalidOperationException($"The pet payload does not contain '{fieldName}'.");
+
+        tracker.Track(PetId);
+        _response = await client.CreatePetAsync(body.ToJsonString(), MediaTypeNames.Application.Json);
+        TrackPetFromResponse(_response);
+    }
+
     [When("I request the pet by its ID")]
     public async Task WhenIRequestThePet() => _response = await client.GetPetAsync(PetId);
 
+    [When("I request a pet with ID {string}")]
+    public async Task WhenIRequestPetWithId(string petId) => _response = await client.GetPetAsync(petId);
+
     [When("I delete the pet")]
     public async Task WhenIDeleteThePet() => _response = await client.DeletePetAsync(PetId);
+
+    [When("I delete a pet with ID {string}")]
+    public async Task WhenIDeletePetWithId(string petId) => _response = await client.DeletePetAsync(petId);
 
     #endregion
 

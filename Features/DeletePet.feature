@@ -22,3 +22,9 @@ Feature: Delete pet
     When I delete the pet
     Then the response status code is 404
 
+  @knownIssue
+  Scenario: Non-numeric pet ID is rejected
+    When I delete a pet with ID "abc"
+    Then the response status code is 400
+    And the response is in JSON format
+

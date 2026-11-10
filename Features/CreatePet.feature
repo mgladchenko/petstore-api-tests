@@ -25,3 +25,14 @@ Feature: Create pet
       """
     Then the response status code is 400
     And the error message is "bad input"
+
+  @knownIssue
+  Scenario Outline: Pet without a required field is rejected
+    Given a new pet with all fields populated
+    When I create the pet without the required field "<field>"
+    Then the response status code is 405
+
+    Examples:
+      | field     |
+      | name      |
+      | photoUrls |

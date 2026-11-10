@@ -11,17 +11,12 @@ Automated API tests for the `Pet` entity of the public [Swagger Petstore](https:
 dotnet test
 ```
 
-Run a subset by tag/category (Reqnroll tags become xUnit traits):
+Run a subset by tag/category excluding tests with @knownIssue tag:
 
 ```bash
-dotnet test --filter "Category=delete"
+dotnet test --filter "Category!=knownIssue"
 ```
 
-Point the suite to another environment without editing files:
-
-```bash
-PetStore__BaseUrl=https://my-petstore.local/v2/ dotnet test
-```
 
 ## Structure
 
@@ -47,6 +42,11 @@ PetStore__BaseUrl=https://my-petstore.local/v2/ dotnet test
 
 | Endpoint | Scenarios |
 |---|---|
-| `POST /pet` | complete pet is returned and persisted; server-generated ID; malformed JSON → 400 |
-| `GET /pet/{petId}` | existing pet is returned; deleted pet → 404; confirmed-unused ID → 404 |
-| `DELETE /pet/{petId}` | delete is confirmed and the pet is gone; another pet remains unaffected; repeated delete → 404 |
+| `POST /pet` | complete pet is returned and persisted; server-generated ID; malformed JSON → 400; missing required `name` or `photoUrls` → 405 (known API issue) |
+| `GET /pet/{petId}` | existing pet is returned; deleted pet → 404; confirmed-unused ID → 404; non-numeric ID is rejected (known API issue)|
+| `DELETE /pet/{petId}` | delete is confirmed and the pet is gone; another pet remains unaffected; repeated delete → 404; non-numeric ID is rejected (known API issue) |
+
+## Known issues
+
+- POST without required `name` or `photoUrls` returns 200 instead of the documented 405. Tagged as `@knownIssue`.
+- GET and DELETE with non-numeric IDs return 404 instead of the documented 400. Tagged as `@knownIssue`.

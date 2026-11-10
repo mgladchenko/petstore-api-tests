@@ -20,3 +20,9 @@ Feature: Get pet by ID
     When I request the pet by its ID
     Then the response status code is 404
     And the error message is "Pet not found"
+
+  @knownIssue
+  Scenario: Non-numeric pet ID is rejected
+    When I request a pet with ID "abc"
+    Then the response status code is 400
+    And the response is in JSON format
